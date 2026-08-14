@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <unistd.h>
+#include <stdio.h>
 
 typedef struct {
   uint32_t D[8];
@@ -15,7 +16,6 @@ typedef struct {
 
 m68k_cpu cpu;
 uint8_t ram[1024 * 1024];
-
 
 uint8_t m68k_read(uint32_t addr) {
   return ram[addr];
@@ -52,6 +52,37 @@ void m68k_write_long_word(uint32_t addr, uint32_t data) {
   uint16_t high_word = (data >> 16) & 0xFFFF;
   m68k_write_word(addr, high_word);
   m68k_write_word(addr + 2, lower_word);
+}
+
+
+uint16_t fetch() {
+  uint16_t data = m68k_read_word(cpu.PC);
+  cpu.PC += 2;
+  return data;
+}
+
+
+int main() {
+  
+  cpu.PC = 0;
+  m68k_write_word(0, 0x4E71);
+  m68k_write_word(2, 0x4E71);
+  
+  
+  while(1) {
+    uint16_t opcode = fetch();
+
+    if (opcode == 0x4E71) {
+      printf("NOP\n");
+    }
+    else {
+      printf("NAI\n");
+      break;
+    }
+
+  }
+
+  return 0;
 }
 
 
