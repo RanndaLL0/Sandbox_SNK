@@ -1,4 +1,6 @@
+#include <endian.h>
 #include <stdint.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
 
@@ -16,6 +18,8 @@ typedef struct {
 
 m68k_cpu cpu;
 uint8_t ram[1024 * 1024];
+
+/* I/O */
 
 uint8_t m68k_read(uint32_t addr) {
   return ram[addr];
@@ -54,11 +58,31 @@ void m68k_write_long_word(uint32_t addr, uint32_t data) {
   m68k_write_word(addr + 2, lower_word);
 }
 
-
 uint16_t fetch() {
   uint16_t data = m68k_read_word(cpu.PC);
   cpu.PC += 2;
   return data;
+}
+
+void decode() {
+
+  uint16_t opcode = fetch();
+  uint8_t family = (opcode >> 12) & 0x000F;
+  
+  if (family == 0xD0) {
+
+    /*
+     *  ADD, ADDA e ADDX
+     * */
+    
+    uint8_t regs = (opcode >> 9) & 0x07;
+    uint8_t opmode = (opcode >> 6) & 0x07; 
+    uint8_t addr_mode = (opcode >> 3) & 0x07;
+    uint8_t addr_reg = opcode & 0x07;
+  } else if (family == 0x04) {
+    
+  }
+
 }
 
 
